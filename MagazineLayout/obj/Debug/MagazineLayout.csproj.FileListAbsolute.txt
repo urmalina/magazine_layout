@@ -1,0 +1,10 @@
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\bin\Debug\MagazineLayout.exe.config
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\bin\Debug\MagazineLayout.exe
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\bin\Debug\MagazineLayout.pdb
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\obj\Debug\MagazineLayout.csproj.AssemblyReference.cache
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\obj\Debug\MagazineLayout.Form1.resources
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\obj\Debug\MagazineLayout.Properties.Resources.resources
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\obj\Debug\MagazineLayout.csproj.GenerateResource.cache
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\obj\Debug\MagazineLayout.csproj.CoreCompileInputs.cache
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\obj\Debug\MagazineLayout.exe
+C:\Users\alino\source\repos\MagazineLayout\MagazineLayout\obj\Debug\MagazineLayout.pdb
