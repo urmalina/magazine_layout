@@ -17,7 +17,7 @@ namespace MagazineLayout
         private Rectangle currentRectangle;
         private Point startPoint;
         private List<Rectangle> illustrations = new List<Rectangle>();
-        private List<Rectangle> Rectangles = new List<Rectangle>();        
+        private List<Rectangle> Rectangles = new List<Rectangle>();
         private OpenFileDialog openFileDialog = new OpenFileDialog();
         public Form1()
         {
@@ -95,10 +95,16 @@ namespace MagazineLayout
                 return;
             }
 
-            string text = File.ReadAllText(textBox1.Text);            
+            string text = File.ReadAllText(textBox1.Text);
             Graphics g = pictureBox1.CreateGraphics();
             Font font = findFontParameters(g, pictureBox1, illustrations, text);
-            FitTextAroundRectangles(g, text, font, pictureBox1.DisplayRectangle, illustrations);
+            List<WordBox> wordBoxes = GenerateWordRectangles(g, text, font, pictureBox1.DisplayRectangle, illustrations, 10);
+
+            
+            foreach (WordBox wordBox in wordBoxes)
+            {
+                g.DrawString(wordBox.WordValue, font, Brushes.Black, wordBox.Rectangle.Location);
+            }
         }
 
         private void btnClear_Click(object sender, EventArgs e)
@@ -134,7 +140,7 @@ namespace MagazineLayout
         //}
 
         private Font findFontParameters(Graphics g, PictureBox pictureBox, List<Rectangle> illustrations, string text)
-        {            
+        {
             int squarePictureBox = pictureBox.Width * pictureBox.Height;
             int squareOfAllRectangles = 0;
             foreach (Rectangle rect in illustrations)
@@ -145,33 +151,35 @@ namespace MagazineLayout
 
             float fontSquare = 0; //подбираем размер шрифта чтобы занималась максимальная доступная площадь
 
-            
+
             Font font = new Font(FontFamily.GenericSansSerif, 1);
             while (fontSquare < squareForText)
             {
                 font = new Font(font.Name, font.Size + 1);
                 fontSquare = TextRenderer.MeasureText(text, font).Width * TextRenderer.MeasureText(text, font).Height;
-                
+
             }
             font = new Font(font.Name, font.Size);
             return font;
         }
-        
-        private void FitTextAroundRectangles(Graphics g, string text, Font font, Rectangle area, List<Rectangle> rectangles)
+
+        private List<WordBox> GenerateWordRectangles(Graphics g, string text, Font font, Rectangle area, List<Rectangle> rectangles, int spaceLength)
         {
             rectangles.Sort((r1, r2) => r1.Y.CompareTo(r2.Y));
-            int lineHeight = TextRenderer.MeasureText("A", font).Height;           
+            int lineHeight = TextRenderer.MeasureText("A", font).Height;
             string[] words = text.Split(' ');
-                                 
+
+            List<WordBox> wordBoxes = new List<WordBox>();
+
             // Рисование текста
             int x = area.Left;
             int y = area.Top;
-            Rectangle wordRect =new Rectangle();
+            Rectangle wordRect = new Rectangle();
             foreach (string word in words)
-            {                
+            {
                 Size wordSize = TextRenderer.MeasureText(word, font);
 
-                wordRect = new Rectangle(x, y, wordSize.Width, wordSize.Height);
+                wordRect = new Rectangle(x, y, wordSize.Width + spaceLength, wordSize.Height);
                 if (wordRect.Right > area.Right)
                 {
                     wordRect.Y += lineHeight;
@@ -190,20 +198,20 @@ namespace MagazineLayout
                                 wordRect.X = area.Left;
                             }
                         }
-                        
-                        
+
+
                     }
-                    
+
 
                 }
-                
-                g.DrawString(word + " ", font, Brushes.Black, new PointF(wordRect.X, wordRect.Y));
+                wordBoxes.Add(new WordBox(word, wordRect, font));
+
                 y = wordRect.Y;
                 x = wordRect.Right;
-                
-            }
 
-            
+            }
+            return wordBoxes;
+
         }
 
         private bool IsRectangleCollision(Rectangle textRect, List<Rectangle> rectangles)
@@ -218,40 +226,78 @@ namespace MagazineLayout
             return false;
         }
 
-        private void CorrectFont()
-        { 
-            
-        }
-        //private void DrawJustifiedLine(Graphics g, string line, Font font, Rectangle rect)
+        //private List<WordBox> FontCorrector(Graphics g, List<WordBox> wordBoxes, Rectangle rectangle)
         //{
-        //    string[] words = line.Split(' ');
-        //    if (words.Length == 1)
+        //    while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y < rectangle.Y - 2* wordBoxes[wordBoxes.Count - 1].WordFont.Height)
         //    {
-        //        g.DrawString(line, font, Brushes.Black, rect.Left, rect.Top);
-        //        return;
-        //    }
-
-        //    // Calculate total width of the words
-        //    float wordsWidth = 0;
-        //    foreach (string word in words)
-        //    {
-        //        wordsWidth += TextRenderer.MeasureText(word, font).Width;
-        //    }
-
-        //    // Calculate the width of the spaces
-        //    float spaceWidth = TextRenderer.MeasureText(" ", font).Width;
-        //    float extraSpace = rect.Width - wordsWidth;
-        //    float spaceBetweenWords = spaceWidth + (extraSpace / (words.Length - 1));
-
-        //    float x = rect.Left;
-        //    foreach (string word in words)
-        //    {
-        //        g.DrawString(word, font, Brushes.Black, x, rect.Top);
-        //        x += TextRenderer.MeasureText(word, font).Width + spaceBetweenWords;
+        //        wordBoxes[wordBoxes.Count - 1].WordFont = new Font ()
+        //        wordBoxes = GenerateWordRectangles()
         //    }
         //}
 
+        //private void DrawWithSpaces(Graphics g, Font font, List<WordBox> wordBoxes, Rectangle rect, List<Rectangle> illustrations)
+        //{
+        //    var groupedByY = wordBoxes
+        //    .GroupBy(wb => wb.Rectangle.Y)
+        //    .OrderBy(x => x.Key)
+        //    .ToList();
+        //    foreach (var group in groupedByY)
+        //    {
+        //        //Console.WriteLine($"Group Y={group.Key}");
+        //        Rectangle lineRectangle = new Rectangle(0, group.Key, rect.Width, TextRenderer.MeasureText("A", font).Height);
+        //        int IntersectLength = 0;
+        //        if (IsRectangleCollision(lineRectangle, illustrations))
+        //        {
+        //            foreach (Rectangle illustration in illustrations)
+        //            {
+        //                if (lineRectangle.IntersectsWith(illustration))
+        //                {
+        //                    IntersectLength += illustration.Width;
+        //                }
+        //            }
+        //        }
+        //        int freeSpace = 
+        //        foreach (var wordBox in group)
+        //        {
+        //            //Console.WriteLine($"  {wordBox}");                    
+                    
+                    
+
+        //        }
+        //    }
+
+            //}
+            //private void DrawJustifiedLine(Graphics g, string line, Font font, Rectangle rect)
+            //{
+            //    string[] words = line.Split(' ');
+            //    if (words.Length == 1)
+            //    {
+            //        g.DrawString(line, font, Brushes.Black, rect.Left, rect.Top);
+            //        return;
+            //    }
+
+            //    // Calculate total width of the words
+            //    float wordsWidth = 0;
+            //    foreach (string word in words)
+            //    {
+            //        wordsWidth += TextRenderer.MeasureText(word, font).Width;
+            //    }
+
+            //    // Calculate the width of the spaces
+            //    float spaceWidth = TextRenderer.MeasureText(" ", font).Width;
+            //    float extraSpace = rect.Width - wordsWidth;
+            //    float spaceBetweenWords = spaceWidth + (extraSpace / (words.Length - 1));
+
+            //    float x = rect.Left;
+            //    foreach (string word in words)
+            //    {
+            //        g.DrawString(word, font, Brushes.Black, x, rect.Top);
+            //        x += TextRenderer.MeasureText(word, font).Width + spaceBetweenWords;
+            //    }
+            //}
 
 
+
+        //}
     }
 }
