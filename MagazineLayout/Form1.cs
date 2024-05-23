@@ -97,14 +97,17 @@ namespace MagazineLayout
 
             string text = File.ReadAllText(textBox1.Text);
             Graphics g = pictureBox1.CreateGraphics();
-            Font font = findFontParameters(g, pictureBox1, illustrations, text);
-            List<WordBox> wordBoxes = GenerateWordRectangles(g, text, font, pictureBox1.DisplayRectangle, illustrations, 10);
+            //Font font = findFontParameters(g, pictureBox1, illustrations, text);
+            //List<WordBox> wordBoxes = GenerateWordRectangles(g, text, font, pictureBox1.DisplayRectangle, illustrations, 10);
 
-            
-            foreach (WordBox wordBox in wordBoxes)
-            {
-                g.DrawString(wordBox.WordValue, font, Brushes.Black, wordBox.Rectangle.Location);
-            }
+
+            //foreach (WordBox wordBox in wordBoxes)
+            //{
+            //    g.DrawString(wordBox.WordValue, font, Brushes.Black, wordBox.Rectangle.Location);
+            //}
+
+            LayoutMaker layoutMaker = new LayoutMaker(g, pictureBox1, text, illustrations);
+            layoutMaker.DrawTextOnLayout();
         }
 
         private void btnClear_Click(object sender, EventArgs e)
@@ -139,92 +142,92 @@ namespace MagazineLayout
         //    }
         //}
 
-        private Font findFontParameters(Graphics g, PictureBox pictureBox, List<Rectangle> illustrations, string text)
-        {
-            int squarePictureBox = pictureBox.Width * pictureBox.Height;
-            int squareOfAllRectangles = 0;
-            foreach (Rectangle rect in illustrations)
-            {
-                squareOfAllRectangles += rect.Height * rect.Width;
-            }
-            int squareForText = squarePictureBox - squareOfAllRectangles;
+        //private Font findFontParameters(Graphics g, PictureBox pictureBox, List<Rectangle> illustrations, string text)
+        //{
+        //    int squarePictureBox = pictureBox.Width * pictureBox.Height;
+        //    int squareOfAllRectangles = 0;
+        //    foreach (Rectangle rect in illustrations)
+        //    {
+        //        squareOfAllRectangles += rect.Height * rect.Width;
+        //    }
+        //    int squareForText = squarePictureBox - squareOfAllRectangles;
 
-            float fontSquare = 0; //подбираем размер шрифта чтобы занималась максимальная доступная площадь
-
-
-            Font font = new Font(FontFamily.GenericSansSerif, 1);
-            while (fontSquare < squareForText)
-            {
-                font = new Font(font.Name, font.Size + 1);
-                fontSquare = TextRenderer.MeasureText(text, font).Width * TextRenderer.MeasureText(text, font).Height;
-
-            }
-            font = new Font(font.Name, font.Size);
-            return font;
-        }
-
-        private List<WordBox> GenerateWordRectangles(Graphics g, string text, Font font, Rectangle area, List<Rectangle> rectangles, int spaceLength)
-        {
-            rectangles.Sort((r1, r2) => r1.Y.CompareTo(r2.Y));
-            int lineHeight = TextRenderer.MeasureText("A", font).Height;
-            string[] words = text.Split(' ');
-
-            List<WordBox> wordBoxes = new List<WordBox>();
-
-            // Рисование текста
-            int x = area.Left;
-            int y = area.Top;
-            Rectangle wordRect = new Rectangle();
-            foreach (string word in words)
-            {
-                Size wordSize = TextRenderer.MeasureText(word, font);
-
-                wordRect = new Rectangle(x, y, wordSize.Width + spaceLength, wordSize.Height);
-                if (wordRect.Right > area.Right)
-                {
-                    wordRect.Y += lineHeight;
-                    wordRect.X = area.Left;
-                }
-                while (IsRectangleCollision(wordRect, rectangles))
-                {
-                    foreach (var rect in rectangles)
-                    {
-                        while (wordRect.IntersectsWith(rect))
-                        {
-                            wordRect.X = rect.Right;
-                            if (wordRect.Right > area.Right)
-                            {
-                                wordRect.Y += lineHeight;
-                                wordRect.X = area.Left;
-                            }
-                        }
+        //    float fontSquare = 0; //подбираем размер шрифта чтобы занималась максимальная доступная площадь
 
 
-                    }
+        //    Font font = new Font(FontFamily.GenericSansSerif, 1);
+        //    while (fontSquare < squareForText)
+        //    {
+        //        font = new Font(font.Name, font.Size + 1);
+        //        fontSquare = TextRenderer.MeasureText(text, font).Width * TextRenderer.MeasureText(text, font).Height;
+
+        //    }
+        //    font = new Font(font.Name, font.Size);
+        //    return font;
+        //}
+
+        //private List<WordBox> GenerateWordRectangles(Graphics g, string text, Font font, Rectangle area, List<Rectangle> rectangles, int spaceLength)
+        //{
+        //    rectangles.Sort((r1, r2) => r1.Y.CompareTo(r2.Y));
+        //    int lineHeight = TextRenderer.MeasureText("A", font).Height;
+        //    string[] words = text.Split(' ');
+
+        //    List<WordBox> wordBoxes = new List<WordBox>();
+
+        //    // Рисование текста
+        //    int x = area.Left;
+        //    int y = area.Top;
+        //    Rectangle wordRect = new Rectangle();
+        //    foreach (string word in words)
+        //    {
+        //        Size wordSize = TextRenderer.MeasureText(word, font);
+
+        //        wordRect = new Rectangle(x, y, wordSize.Width + spaceLength, wordSize.Height);
+        //        if (wordRect.Right > area.Right)
+        //        {
+        //            wordRect.Y += lineHeight;
+        //            wordRect.X = area.Left;
+        //        }
+        //        while (IsRectangleCollision(wordRect, rectangles))
+        //        {
+        //            foreach (var rect in rectangles)
+        //            {
+        //                while (wordRect.IntersectsWith(rect))
+        //                {
+        //                    wordRect.X = rect.Right;
+        //                    if (wordRect.Right > area.Right)
+        //                    {
+        //                        wordRect.Y += lineHeight;
+        //                        wordRect.X = area.Left;
+        //                    }
+        //                }
 
 
-                }
-                wordBoxes.Add(new WordBox(word, wordRect, font));
+        //            }
 
-                y = wordRect.Y;
-                x = wordRect.Right;
 
-            }
-            return wordBoxes;
+        //        }
+        //        wordBoxes.Add(new WordBox(word, wordRect, font));
 
-        }
+        //        y = wordRect.Y;
+        //        x = wordRect.Right;
 
-        private bool IsRectangleCollision(Rectangle textRect, List<Rectangle> rectangles)
-        {
-            foreach (var rect in rectangles)
-            {
-                if (rect.IntersectsWith(Rectangle.Round(textRect)))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        //    }
+        //    return wordBoxes;
+
+        //}
+
+        //private bool IsRectangleCollision(Rectangle textRect, List<Rectangle> rectangles)
+        //{
+        //    foreach (var rect in rectangles)
+        //    {
+        //        if (rect.IntersectsWith(Rectangle.Round(textRect)))
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
 
         //private List<WordBox> FontCorrector(Graphics g, List<WordBox> wordBoxes, Rectangle rectangle)
         //{
