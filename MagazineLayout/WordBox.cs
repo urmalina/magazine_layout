@@ -29,25 +29,12 @@ namespace MagazineLayout
             get { return wordFont; }
             set { wordFont = value; }
         }
-
-        
+                
         public void IncreaseFontSize(int add)
         {
             this.WordFont = new Font(this.WordFont.Name, this.WordFont.Size + add);
         }
-
-        //private bool IntersectsWithRectangle;
-        //public bool IntersectsWithRectangle1 { get => IntersectsWithRectangle; set => IntersectsWithRectangle = value; }
-        //private List<Rectangle> intersectRectangles = new List<Rectangle>();
-        //public List<Rectangle> IntersectRectangles
-        //{
-        //    get { return intersectRectangles; }
-        //    set { intersectRectangles = value; }
-        //}
-        //public void AddIntersectRectangle(Rectangle rectangle)
-        //{
-        //    this.IntersectRectangles.Add(rectangle);
-        //}
+                
         public WordBox(string wordValue, Rectangle rectangle, Font font)
         {
             this.wordValue = wordValue;

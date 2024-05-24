@@ -18,16 +18,17 @@ namespace MagazineLayout
         }
         private Rectangle mainRectangle;
         private Graphics g;
-        private Font font;
+        private Font font = new Font(FontFamily.GenericSansSerif, 1);
         private List<WordBox> wordBoxes;
         private List<Rectangle> illustrations;
         private int spaceLength;
-        public Rectangle MainRectangle { get => mainRectangle; set => mainRectangle = value; }
+       
+        //public Rectangle MainRectangle { get => mainRectangle; set => mainRectangle = value; }
 
-        public Graphics G { get => g; set => g = value; }
-        public Font Font { get => font; set => font = value; }
-        public List<WordBox> WordBoxes { get => wordBoxes; set => wordBoxes = value; }
-        public List<Rectangle> Illustrations { get => illustrations; set => illustrations = value; }
+        //public Graphics G { get => g; set => g = value; }
+        //public Font Font { get => font; set => font = value; }
+        //public List<WordBox> WordBoxes { get => wordBoxes; set => wordBoxes = value; }
+        //public List<Rectangle> Illustrations { get => illustrations; set => illustrations = value; }
 
         public LayoutMaker(Graphics g, PictureBox pictureBox, string Text, List<Rectangle> illustrations)
         {
@@ -41,6 +42,10 @@ namespace MagazineLayout
         {
             FindFontParameters();
             wordBoxes = GenerateWordRectangles();
+
+            CorrectFontSize();
+            wordBoxes = GenerateWordRectangles();
+            CorrectWordSpace();
             foreach (WordBox wordBox in wordBoxes)
             {
                 g.DrawString(wordBox.WordValue, font, Brushes.Black, wordBox.Rectangle.Location);
@@ -132,6 +137,39 @@ namespace MagazineLayout
             }
             return wordBoxes1;
 
+        }
+        private void CorrectFontSize()
+        {
+            
+            while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y < mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
+            {
+                Font font = new Font(FontFamily.GenericSansSerif, this.font.Size + 1);
+                this.font = font;
+                wordBoxes = GenerateWordRectangles();
+            }
+            while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y > mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
+            {
+
+                Font font = new Font(FontFamily.GenericSansSerif, this.font.Size - 1);
+                this.font = font;
+                wordBoxes = GenerateWordRectangles();
+            }
+
+        }
+
+        private void CorrectWordSpace()
+        {
+            while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y < mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
+            {
+                this.spaceLength++;
+                wordBoxes = GenerateWordRectangles();
+            }
+            while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y > mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
+            {
+
+                this.spaceLength--;
+                wordBoxes = GenerateWordRectangles();
+            }
         }
 
     }
