@@ -10,7 +10,6 @@ namespace MagazineLayout
     class WordBox
     {
         private Rectangle rectangle;
-        private int letterSpace;
         public Rectangle Rectangle
         {
             get { return rectangle; }
@@ -42,11 +41,6 @@ namespace MagazineLayout
             this.rectangle = rectangle;
             this.wordFont = font;
         }
-
-        //public void drawWord(Graphics g, Brushes brush)
-        //{ 
-            
-        //}
 
     }
 }

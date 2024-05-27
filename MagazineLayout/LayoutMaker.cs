@@ -22,9 +22,17 @@ namespace MagazineLayout
         private List<WordBox> wordBoxes;
         private List<Rectangle> illustrations;
         private int spaceLength;
-        private List<int> letterSpaces;
+        private List<int> eachLineSpaces;
         private List<List<WordBox>> lines;
-        
+        private List<List<WordBox>> linesWithSpaces;
+
+        //public Rectangle MainRectangle { get => mainRectangle; set => mainRectangle = value; }
+
+        //public Graphics G { get => g; set => g = value; }
+        //public Font Font { get => font; set => font = value; }
+        //public List<WordBox> WordBoxes { get => wordBoxes; set => wordBoxes = value; }
+        //public List<Rectangle> Illustrations { get => illustrations; set => illustrations = value; }
+
         public LayoutMaker(Graphics g, PictureBox pictureBox, string Text, List<Rectangle> illustrations)
         {
             this.g = g;
@@ -36,16 +44,22 @@ namespace MagazineLayout
         public void DrawTextOnLayout()
         {
             FindFontParameters();
-            GenerateWordRectangles();
+            wordBoxes = GenerateWordRectangles();
 
             CorrectFontSize();
-            //wordBoxes = GenerateWordRectangles();
+            wordBoxes = GenerateWordRectangles();
             CorrectWordSpace();
-            foreach (WordBox wordBox in wordBoxes)
+            //foreach (WordBox wordBox in wordBoxes)
+            //{
+            //    g.DrawString(wordBox.WordValue, font, Brushes.Black, wordBox.Rectangle.Location);
+            //}
+            foreach (List<WordBox> line in linesWithSpaces)
             {
-                g.DrawString(wordBox.WordValue, font, Brushes.Black, wordBox.Rectangle.Location);
-                //foreach ()
-            }
+                foreach (WordBox wordBox in line)
+                {
+                    g.DrawString(wordBox.WordValue, font, Brushes.Black, wordBox.Rectangle.Location);
+                }
+            }   
         }
 
         private void FindFontParameters()
@@ -84,74 +98,42 @@ namespace MagazineLayout
             return false;
         }
 
-        private void GenerateWordRectangles()
-        {   wordBoxes = new List<WordBox>();
-            illustrations.Sort((r1, r2) => r1.Y.CompareTo(r2.Y));
-            //int lineHeight = TextRenderer.MeasureText("A", font).Height;
-            string[] words = text.Split(' ', '\n');
+        private List<WordBox> GenerateWordRectangles()
+        {
+            //illustrations.Sort((r1, r2) => r1.Y.CompareTo(r2.Y));
+            int lineHeight = TextRenderer.MeasureText("A", font).Height;
+            string[] words = text.Split(' ');
 
-            //List<WordBox> wordBoxes1 = new List<WordBox>();
-            //lines = new List<List<WordBox>>();
+            List<WordBox> wordBoxes1 = new List<WordBox>();
+            lines = new List<List<WordBox>>();
+            List<WordBox> line = new List<WordBox>();
+
             // Рисование текста
             int x = mainRectangle.Left;
             int y = mainRectangle.Top;
-            //List<WordBox> line = new List<WordBox>();
-            //Rectangle wordRect = new Rectangle();
+            Rectangle wordRect = new Rectangle();
             foreach (string word in words)
             {
-                //int indexOfletter = 0;
-                //int numberOfLetters = word.Length;
-                //List<WordBox> letters = GenerateLetterRectangles(word, x, y);
-                //foreach(letter in letters)
-                GenerateLetterRectangles(word, x, y);
-                x = wordBoxes[wordBoxes.Count - 1].Rectangle.Right;
-                y = wordBoxes[wordBoxes.Count - 1].Rectangle.Y;
-            }
-            //return wordBoxes1;
+                Size wordSize = TextRenderer.MeasureText(word, font);
 
-        }
-
-        private void GenerateLetterRectangles(string word, int x, int y)
-        {
-            int X = x;
-            int Y = y;
-            int lineHeight = TextRenderer.MeasureText("A", font).Height;
-            //int indexOfletter = 0;
-            int numberOfLetters = word.Length;
-            List<WordBox> letters = new List<WordBox>();
-            for (int i = 0; i < word.Length; i++)            
-            {                
-                Size rectSize = TextRenderer.MeasureText(word[i].ToString(), font);
-                Rectangle letterRect;
-                if (i == numberOfLetters - 1)
+                wordRect = new Rectangle(x, y, wordSize.Width + spaceLength, wordSize.Height);
+                if (wordRect.Right > mainRectangle.Right)
                 {
-                    letterRect = new Rectangle(X, Y, rectSize.Width + spaceLength, rectSize.Height);
+                    wordRect.Y += lineHeight;
+                    wordRect.X = mainRectangle.Left;
                 }
-                else
-                {
-                    letterRect = new Rectangle(X, Y, rectSize.Width, rectSize.Height);
-                }
-                //wordRect = new Rectangle(x, y, rectSize.Width + spaceLength, rectSize.Height);
-                if (letterRect.Right > mainRectangle.Right)
-                {
-                    
-                    Y += lineHeight;
-                    X = mainRectangle.Left;
-                    letters.Clear();                   
-                    GenerateLetterRectangles(word, X, Y);
-                    break;
-                }
-                if (IsRectangleCollision(letterRect, illustrations))
+                while (IsRectangleCollision(wordRect, illustrations))
                 {
                     foreach (var rect in illustrations)
                     {
-                        if (letterRect.IntersectsWith(rect))
+                        while (wordRect.IntersectsWith(rect))
                         {
-                            X = rect.Right;
-                            Y = y;
-                            letters.Clear();
-                            GenerateLetterRectangles(word, X, Y);
-                            break;
+                            wordRect.X = rect.Right;
+                            if (wordRect.Right > mainRectangle.Right)
+                            {
+                                wordRect.Y += lineHeight;
+                                wordRect.X = mainRectangle.Left;
+                            }
                         }
 
 
@@ -159,19 +141,26 @@ namespace MagazineLayout
 
 
                 }
-                WordBox letter = new WordBox(word[i].ToString(), letterRect, font);
-                letters.Add(letter);
-                X = letterRect.Right;
-                Y = letterRect.Y;
-            }
-            if (letters.Count > 0)
-            {
-                foreach (WordBox letter in letters)
+                WordBox word1 = new WordBox(word, wordRect, font);
+                wordBoxes1.Add(word1);
+
+                if (y == word1.Rectangle.Y)
                 {
-                    wordBoxes.Add(letter);
+                    line.Add(word1);
                 }
+                else
+                {
+                    List<WordBox> line1 = line;
+                    lines.Add(line1);
+                    line.Clear();
+                    line.Add(word1);
+                }
+
+                y = wordRect.Y;
+                x = wordRect.Right;
+
             }
-            
+            return wordBoxes1;
 
         }
         private void CorrectFontSize()
@@ -181,70 +170,85 @@ namespace MagazineLayout
             {
                 Font font = new Font(FontFamily.GenericSansSerif, this.font.Size + 1);
                 this.font = font;
-                GenerateWordRectangles();
+                wordBoxes = GenerateWordRectangles();
             }
             while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y > mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
             {
 
                 Font font = new Font(FontFamily.GenericSansSerif, this.font.Size - 1);
                 this.font = font;
-                GenerateWordRectangles();
+                wordBoxes = GenerateWordRectangles();
             }
 
         }
 
         private void CorrectWordSpace()
         {
+            linesWithSpaces = new List<List<WordBox>>();
             while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y < mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
             {
                 this.spaceLength++;
-                GenerateWordRectangles();
+                wordBoxes = GenerateWordRectangles();
             }
             while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y > mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
             {
 
                 this.spaceLength--;
-                GenerateWordRectangles();
+                wordBoxes = GenerateWordRectangles();
             }
-        }
-
-        private void DivideOnChars()
-        {
-            //var groupedByY = wordBoxes
-            //.GroupBy(wb => wb.Rectangle.Y)
-            //.OrderBy(g => g.Key)
-            //.ToList();
-
-            //foreach (var group in groupedByY)
-            //{
-            //    //Console.WriteLine($"Group Y={group.Key}");
-            //    foreach (var wordBox in group)
-            //    {
-            //        //Console.WriteLine($"  {wordBox}");
-            //    }
-            //}
-
-            //while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y < mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
-            //{
-            //    this.spaceLength++;
-            //    wordBoxes = GenerateWordRectangles();
-            //}
-            //while (wordBoxes[wordBoxes.Count - 1].Rectangle.Y > mainRectangle.Height - 2 * TextRenderer.MeasureText("A", font).Height)
-            //{
-
-            //    this.spaceLength--;
-            //    wordBoxes = GenerateWordRectangles();
-            //}
-
-            foreach (List<WordBox> line in lines)
+            if (lines != null)
             {
-                int letterSpace = 1;
-                //while ()
-                //foreach (WordBox word in line)
-                //{ 
+                foreach (List<WordBox> line in lines)
+                {
+                    if (line != null)
+                    {
+                        int lineSpaceLength = this.spaceLength;
+                        List<WordBox> testLine = line;
+                        if (line.Count > 1)
+                        {
+                            while (!LineIntersectsRectangle(testLine) && testLine[testLine.Count - 1].Rectangle.Right < mainRectangle.Width)
+                            {
+                                testLine = GenerateLineWithSpaces(line, lineSpaceLength);
+                                lineSpaceLength++;
+
+                            }
+                            //testLine = GenerateLineWithSpaces(line, lineSpaceLength );
+                        }
+
+                        //eachLineSpaces.Add(lineSpaceLength--);
+                        List<WordBox> list = testLine;
+                        linesWithSpaces.Add(list);
+                    }
                     
-                //}
+                }
             }
+            
         }
+        private bool LineIntersectsRectangle(List<WordBox> line)
+        {
+            foreach (WordBox wordBox in line)
+            {
+                if (IsRectangleCollision(wordBox.Rectangle, illustrations))
+                {
+                    return true;
+                }
+                
+            }
+            return false;
+        }
+
+        private List<WordBox> GenerateLineWithSpaces(List<WordBox> line, int space)
+        {
+            List<WordBox> newLine = new List<WordBox>();
+            WordBox newWordBox;
+            for (int i = 1; i < line.Count; i++)
+            {
+                Rectangle newRectangle = new Rectangle(line[i].Rectangle.X + space, line[i].Rectangle.Y, line[i].Rectangle.Width, line[i].Rectangle.Height);
+                newWordBox = new WordBox(line[i].WordValue, newRectangle, font);
+                newLine.Add(newWordBox);
+            }
+            return newLine;
+        }
+
     }
 }
