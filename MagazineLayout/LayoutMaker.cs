@@ -40,9 +40,8 @@ namespace MagazineLayout
 
         public void DrawTextOnLayout()
         {
-            FindFontParameters();
+            //FindFontParameters();
             wordBoxes = GenerateWordRectangles();
-
             CorrectFontSize();            
             CorrectWordSpace();
             foreach (WordBox wordBox in wordBoxes)
@@ -51,29 +50,29 @@ namespace MagazineLayout
             }
         }
 
-        private void FindFontParameters()
-        {
-            int squarePictureBox = mainRectangle.Width * mainRectangle.Height;
-            int squareOfAllRectangles = 0;
-            foreach (Rectangle rect in illustrations)
-            {
-                squareOfAllRectangles += rect.Height * rect.Width;
-            }
-            int squareForText = squarePictureBox - squareOfAllRectangles;
+        //private void FindFontParameters()
+        //{
+        //    int squarePictureBox = mainRectangle.Width * mainRectangle.Height;
+        //    int squareOfAllRectangles = 0;
+        //    foreach (Rectangle rect in illustrations)
+        //    {
+        //        squareOfAllRectangles += rect.Height * rect.Width;
+        //    }
+        //    int squareForText = squarePictureBox - squareOfAllRectangles;
 
-            float fontSquare = 0; //подбираем размер шрифта чтобы занималась максимальная доступная площадь
+        //    float fontSquare = 0; //подбираем размер шрифта чтобы занималась максимальная доступная площадь
 
 
-            Font font = new Font(FontFamily.GenericSansSerif, 1);
-            while (fontSquare < squareForText)
-            {
-                font = new Font(font.Name, font.Size + 1);
-                fontSquare = TextRenderer.MeasureText(text, font).Width * TextRenderer.MeasureText(text, font).Height;
+        //    Font font = new Font(FontFamily.GenericSansSerif, 1);
+        //    while (fontSquare < squareForText)
+        //    {
+        //        font = new Font(font.Name, font.Size + 1);
+        //        fontSquare = TextRenderer.MeasureText(text, font).Width * TextRenderer.MeasureText(text, font).Height;
 
-            }
-            this.font = new Font(font.Name, font.Size);
+        //    }
+        //    this.font = new Font(font.Name, font.Size);
             
-        }
+        //}
 
         private bool IsRectangleCollision(Rectangle rectangle, List<Rectangle> rectangles)
         {
